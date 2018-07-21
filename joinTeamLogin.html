@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="full-screen" content="yes">
+    <meta name="x5-fullscreen" content="true">
+    <title>加入团队</title>
+    <script type="text/javascript" src="http://tajs.qq.com/stats?sId=37342703" charset="UTF-8"></script>
+    <link rel="stylesheet" href="./dist/css/frozen.css"/>
+    <link rel="stylesheet" href="./dist/css/joinTeam.css"/>
+    <link rel="stylesheet" href="dist/css/dropload.css">
+</head>
+<body>
+    <div id="loginIn">
+        <header class="loginHeader">
+            <h3>绑定手机号</h3>
+        </header>
+        <div class="ui-form-item ui-form-item-pure ui-border-b">
+            <input id="phoneNum" type="text" placeholder="输入手机号">
+        </div>
+        <div class="ui-form-item ui-form-item-r ui-border-b">
+            <input type="text" id="codeVerify" placeholder="输入验证码">
+            <!-- 若按钮不可点击则添加 disabled 类 -->
+            <button type="button" class="ui-border-l disabled" id="sendVerify">获取验证码</button>
+        </div>
+        <div class="ui-form-item ui-form-item-pure ui-border-b hide" id="inputPsd">
+            <input id="password" type="password" placeholder="设置密码,至少是字母、数字的组合,8-16位字符">
+        </div>
+        <div>
+            <button id="bind" class="ui-btn-lg ui-btn-primary disabled">
+                绑定
+            </button>
+        </div>
+        <div class="ui-tips ui-tips-info">
+            <i></i><span>在此绑定的手机号可用于手播课APP登录</span>
+        </div>
+    </div>
+    <div class="ui-loading-block" style="display: -webkit-box;z-index: 1000;background: #f8f8f8">
+        <div class="ui-loading-cnt">
+            <i class="ui-loading-bright"></i>
+            <p>正在加载中...</p>
+        </div>
+    </div>
+    <div id="notgetAcross">
+        <section class="ui-notice">
+            <i></i>
+            <p>加载出错了</p>
+        </section>
+    </div>
+</body>
+<script src="./dist/lib/zepto.min.js"></script>
+<script src="./dist/js/frozen.js"></script>
+<script src="./dist/js/dropload.min.js"></script>
+<script src="./dist/js/cookie.min.js"></script>
+<script type="text/javascript">
+    (function($){
+        var Page = {
+            commonUrl:"http://api-sbkt.lycam.tv/",
+            //commonUrl:"http://sbkt-port-1178495353.cn-north-1.elb.amazonaws.com.cn/",
+            token:null,
+            page:1,
+            perPageCount:5,
+            forData:"",
+            onceGetCode:false,
+            timercount:null,
+            linkUrl:"https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx18e63e75d50cb458&redirect_uri=http://shouboke.tv/webChatPublic/joinTeamLogin.html&response_type=code&scope=snsapi_userinfo#wechat_redirect",
+            init : function(){
+                var _this=this;
+                var url = window.location.search;
+                var array1 = url.split("=");
+                var code = array1[1].substr(0,array1[1].indexOf('&state'));
+                $.ajax({
+                    url: _this.commonUrl+"wechat/wechatLogin",
+                    type: "post",
+                    data: {
+                        code: code
+                    },
+                    success: function (data){
+                        console.log('loginIndata',data)
+                        _this.token=data.token.token
+                        cookie.remove(['jttoken']);
+                        cookie.set('jttoken', data.token.token);
+                        if(data.phone){
+                            _this.passLogin()
+                        }else{
+                            _this.unPassLogin()
+                        }
+                        _this.bindEvent()
+                    },
+                    error: function (error) {
+                        if(!_this.onceGetCode){
+                            _this.onceGetCode=true;
+                            window.location.href=_this.linkUrl
+                        }
+                        console.log("loginError",error);
+                        $("#notgetAcross").show()
+                    }
+                })
+            },
+            passLogin:function(){
+                $(".ui-loading-block").hide()
+                $("#loginIn").hide();
+                window.location.href = "joinTeam.html"
+            },
+            unPassLogin:function(){
+                $(".ui-loading-block").hide()
+                $("#loginIn").show();
+            },
+
+            //绑定手机
+            countNumInit:function(){
+                var _this=this, countNum=180;
+                $("#sendVerify").html(countNum+"s后失效")
+                $("#sendVerify").addClass("disabled")
+                _this.timercount=setInterval(function(){
+                    countNum--;
+                    if(countNum<=0){
+                        $("#sendVerify").removeClass("disabled")
+                        $("#sendVerify").html('重新发送')
+                        clearInterval(_this.timercount)
+                    }else{
+                        $("#sendVerify").html(countNum+"s后失效")
+                    }
+
+                },1000)
+
+            },
+            sendCode:function(){
+                var _this=this;
+                $.ajax({
+                    type:'GET',
+                    url:_this.commonUrl+"sms/getCode?phone="+$("#phoneNum").val()+"&type=binding",
+                    headers:{
+                        Authorization: "Bearer "+_this.token
+                    },
+                    success:function(data){
+                        if(data.success){
+                            _this.countNumInit();
+                        }else{
+                            _this.warn("发送验证码失败")
+                        }
+                    },
+                    error:function(){
+                        _this.warn("发送验证码失败")
+                    }
+
+                })
+            },
+            verifyCode:function(){
+                var _this=this;
+                $.ajax({
+                    type: 'POST',
+                    url: _this.commonUrl + "sms/verifyCode",
+                    data: {
+                        phone: $("#phoneNum").val(),
+                        authCode: $("#codeVerify").val(),
+                        type: "binding"
+                    },
+                    headers: {
+                        Authorization: "Bearer " + _this.token
+                    },
+                    success: function (data) {
+                        if(data.success){
+                            if(data.newPhone){//需要用户输入密码
+                                $("#inputPsd.hide")&&$("#inputPsd.hide").removeClass("hide");
+                                if(!$("#bind").hasClass("disabled")){
+                                    $("#bind").addClass("disabled")
+                                }
+                            }else{
+                               if(!$("#inputPsd").hasClass('hide')){
+                                   $("#inputPsd").addClass('hide')
+                               }
+                                $("#bind.disabled")&&$("#bind.disabled").removeClass("disabled");
+                            }
+                        }else{
+                            if(!$("#bind").hasClass("disabled")){
+                                $("#bind").addClass("disabled")
+                            }
+                            _this.warn("验证码错误")
+                        }
+                    },
+                    error: function (error) {
+                        console.log('error',error);
+                        if(!$("#bind").hasClass("disabled")){
+                            $("#bind").addClass("disabled")
+                        }
+                        _this.warn("验证码错误")
+                    }
+                })
+            },
+            completeForm:function(){//keyup指示绑定按钮
+                var _this=this;
+                var phonereg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/,
+                    sixNum=/^\d{6}$/,
+                    psd=/^(?=.*[0-9])(?=.*[a-zA-Z]).{8,16}$/   //至少是字母、数字的组合，可以输入特殊字符,8-16位字符
+                if(!$("#inputPsd").hasClass('hide')){
+                    if(phonereg.test($("#phoneNum").val())&&sixNum.test($("#codeVerify").val())&&psd.test($("#password").val())){
+                        return true;
+                    }
+                }else{
+                    if(phonereg.test($("#phoneNum").val())&&sixNum.test($("#codeVerify").val())){
+                        return true;
+                    }
+                }
+
+            },
+            completePhone:function(){//keyup电话号码指示获取验证码
+                var phonereg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/;
+                if(!phonereg.test($("#phoneNum").val()))
+                {
+                    if(!$("#sendVerify").hasClass('disabled')){
+                        $("#sendVerify").addClass('disabled')
+                    }
+                }else{
+                    $("#sendVerify.disabled")&&$("#sendVerify.disabled").removeClass('disabled')
+                }
+            },
+
+            warn:function(content){
+                $.tips({
+                    content:content,
+                    stayTime:3000,
+                    type:"warn"
+                })
+            },
+            success:function(content){
+                $.tips({
+                    content:content,
+                    stayTime:2000,
+                    type:"success"
+                })
+            },
+
+            bindEvent : function(){
+                var _this = this;
+                $("#sendVerify").on('tap',function(){//发送短信验证
+                    if($("#sendVerify").hasClass("disabled")){
+                        return;
+                    }
+                    _this.sendCode();
+                });
+                //表单验证提示
+                $("#loginIn input").on("blur",function(){
+                    var phonereg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/,
+                            sixNum=/^\d{6}$/,
+                            psd=/^(?=.*[0-9])(?=.*[a-zA-Z]).{8,16}$/   //至少是字母、数字的组合，可以输入特殊字符,8-16位字符
+                    if($(this).attr('id')=="phoneNum"){
+                        if($("#phoneNum").val()!==""&&!phonereg.test($("#phoneNum").val()))
+                        {
+                            _this.warn("请输入正确的手机号")
+                        }
+                    }else if($(this).attr('id')=="codeVerify"){
+                        if($("#codeVerify").val()!==""&&!sixNum.test($("#codeVerify").val()))
+                        {
+                            _this.warn("请输入6位数字验证码")
+                        }
+                    }else if($(this).attr('id')=="password"){
+                        if($("#password").val()!==""&&!psd.test($("#password").val()))
+                        {
+                            _this.warn("至少是字母、数字的组合,8-16位字符")
+                        }
+                    }else{
+                        return;
+                    }
+                });
+                //验证是否可绑定
+                $("#loginIn input").on("keyup",function(){
+                    if(_this.completeForm()){
+                        $("#bind.disabled")&&$("#bind.disabled").removeClass('disabled')
+                    }else{
+                        if(!$("#bind").hasClass("disabled")){
+                            $("#bind").addClass("disabled")
+                        }
+                    }
+                    //得到code验证是否是newphone
+                    if(/^\d{6}$/.test($("#codeVerify").val())&&/^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/.test($("#phoneNum").val()))
+                    {
+                        _this.verifyCode();
+                    }else{
+                        if(!$("#inputPsd").hasClass('hide')){
+                            $("#inputPsd").addClass("hide")
+                        }
+                    }
+                });
+                $("#loginIn input#phoneNum").on("keyup",function(){
+                    _this.completePhone();
+                });
+                $("#bind").on('tap',function(){
+                    if($("#bind").hasClass('disabled')){return;}
+                    if($("#inputPsd").hasClass("hide")){
+                        $.ajax({
+                            type:'POST',
+                            url:_this.commonUrl+"user/bindPhone",
+                            headers:{
+                                Authorization: "Bearer "+_this.token
+                            },
+                            data:{
+                                phone:$("#phoneNum").val()
+                            },
+                            success:function(data){
+                                _this.token=data.token.token;
+                                cookie.remove(['jttoken']);
+                                cookie.set('jttoken', data.token.token);
+                                _this.passLogin()
+                            },
+                            error:function(error){
+                                console.log('绑定失败',JSON.parse(error.responseText).error_output)
+                                _this.warn(JSON.parse(error.responseText).error_output)
+                            }
+                        })
+                    }else{
+                        $.ajax({
+                            type:'POST',
+                            url:_this.commonUrl+"user/bindPhone",
+                            headers:{
+                                Authorization: "Bearer "+_this.token
+                            },
+                            data:{
+                                phone:$("#phoneNum").val(),
+                                password:$("#password").val()
+                            },
+                            success:function(data){
+                                _this.success("绑定成功")
+                                _this.token=data.token.token;
+                                _this.passLogin()
+                            },
+                            error:function(error){
+                                _this.warn("绑定失败")
+                            }
+                        })
+                    }
+
+                })
+            }
+        };
+        $(function(){
+            Page.init()
+        })
+    })(Zepto)
+
+</script>
+</html>

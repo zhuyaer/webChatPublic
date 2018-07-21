@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport"  content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no" charset="utf-8">
+<title>经典回放</title>
+<link rel="stylesheet" href="./dist/css/mui.min.css" />
+<link href="https://cdn.bootcss.com/FrozenUI/1.3.0/css/frozen-min.css" rel="stylesheet">
+<link href="https://cdn.bootcss.com/FrozenUI/1.3.0/css/icon-full.css" rel="stylesheet">
+<style type="text/css">
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    .mui-content>.mui-table-view:first-child{
+        margin-top: 0;
+    }
+    .mui-table-view-cell{
+        font-size: 14px;
+    }
+    .mui-media-body{
+        height: 42px;
+        line-height: 42px;
+    }
+    h3{
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+    }
+    .time{
+        /*width: 40%;*/
+        color: #AAAAAA;
+        float: left;
+        font-size: .12rem;
+    }
+    .mui-navigate-right{
+        /*height: 20px;*/
+        line-height: 30px;
+    }
+    li img{
+        width: .96rem;
+        max-width: .96rem!important;
+        height: .54rem!important;
+    }
+    .mui-table-view-cell{
+        padding-top: 16px;
+        padding-bottom: 16px;
+    }
+    .mui-table-view-cell:after{
+        background-color: #f4f4f4;
+    }
+    .mui-media-body{
+        height:50px;
+    }
+    #userInfo{
+        width: 3.75rem;
+        height: 2rem;
+        background-color: #ffffff;
+        float: left;
+    }
+    #headImg{
+        width: .8rem;
+        height: .8rem;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-left: 1.475rem;
+        margin-top: .3rem;
+        background-color: #a2ae69;
+    }
+    #headImg img{
+        width: 100%;
+        height: 100%;
+    }
+    #name{
+        color: #030303;
+        font-size: .17rem;
+        text-align: center;
+        margin-top: .15rem;
+        font-weight: 500;
+    }
+    #sign{
+        color: #757887;
+        font-size: .15rem;
+        text-align: center;
+        margin-top: .15rem;
+        padding-left: .05rem;
+        padding-right: .05rem;
+        overflow: hidden;
+        text-overflow:ellipsis;
+        white-space: nowrap;
+        height: .2rem;
+        line-height: .2rem;
+    }
+    #videoList{
+        /*margin-top: .05rem;*/
+        float: left;
+        width: 3.75rem;
+    }
+    .watchCount{
+        width: 25%;
+        float: right;
+        text-align: left;
+    }
+
+    .img{
+        position: relative;
+    }
+
+    .status{
+        position: absolute;
+        left: .11rem;
+        font-size: .12rem;
+        color: #FFFFFF;
+        padding: 0 .03rem;
+        background-color: #14C864;
+    }
+
+    .watchCount>span:first-of-type{
+        font-size: .16rem;
+        color: #AEB2C6;
+        display: inline;
+        margin-right: .03rem;
+    }
+
+    .watchCount>span:nth-of-type(2){
+        font-size: .12rem;
+        color: #AEB2C6;
+    }
+    #title{
+        width: 100%;
+        height: .4rem;
+        background-color:#ffffff;
+        padding-top: .05rem;
+    }
+
+    .videoTitle{
+        overflow: hidden;
+        text-overflow:ellipsis;
+        white-space: nowrap;
+        color: #393939;
+        font-size: .14rem;
+        line-height: .22rem;
+    }
+    .green{
+        width: .06rem;
+        height: .14rem;
+        background-color: #14C864;
+        margin-left: .1rem;
+        float: left;
+        margin-top: .08rem;
+    }
+    #refreshContainer{
+        /*top: 2.9rem;*/
+    }
+    #title span:first-of-type{
+        color: #2B2B2B;
+        font-size: .17rem;
+        margin-left: .03rem;
+        line-height: .3rem;
+        height: .3rem;
+        display: inline-block;
+    }
+    #title span:nth-of-type(2){
+        color: #757887;
+        font-size: .17rem;
+        line-height: .3rem;
+        height: .3rem;
+        display: inline-block;
+    }
+    .mui-table-view-chevron .mui-table-view-cell{
+        padding-right: .2rem;
+    }
+    #block{
+        display: none;
+    }
+    .search>input{
+        background-color: #ffffff;
+        margin-top: .12rem;
+        height: .3rem;
+        margin-bottom: .1rem;
+        width: 2.7rem;
+        margin-left: .1rem;
+        font-size: .14rem;
+        text-align: left;
+        padding-left: .35rem;
+        border-radius: .15rem;
+    }
+    .search{
+        float: left;
+        position: relative;
+    }
+    .search>.mui-icon-search{
+        position: absolute;
+        font-size: .2rem;
+        top: .16rem;
+        left: .2rem;
+    }
+    #search{
+        width:.7rem;
+        height:.28rem;
+        background:rgba(20,200,100,1);
+        border-radius: .16rem ;
+        display: inline-block;
+        color: #ffffff;
+        font-size: .16rem;
+        line-height: .28rem;
+        text-align: center;
+        margin-left: .1rem;
+    }
+    .mui-table-view:before{
+        background-color: #F2F2F2;
+    }
+</style>
+</head>
+<body>
+<div id="block" class="mui-content">
+    <div id="refreshContainer" class="mui-content mui-scroll-wrapper">
+        <div class="mui-scroll">
+            <div class="search">
+                <input type="search" placeholder="搜索课程关键字">
+                <span class="mui-icon mui-icon-search"></span>
+                <span id="search">搜索</span>
+            </div>
+            <div id="videoList">
+                    <!--数据列表-->
+                    <ul class="mui-table-view mui-table-view-chevron">
+
+                    </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="./dist/js/mui.min.js"></script>
+<script src="https://cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+<script src="https://cdn.bootcss.com/FrozenUI/1.3.0/js/frozen.js"></script>
+<script type="text/javascript">
+    (function () {
+        document.addEventListener('DOMContentLoaded', function () {//设置根元素大小，实现自适应
+            var html = document.documentElement;
+            var windowWidth = html.clientWidth;
+            html.style.fontSize = windowWidth / 3.75 + 'px';
+        }, false);
+    })();
+    var pageNumber=1;
+    var _url="http://api-sbkt.lycam.tv/";
+    load();
+    mui.init({
+        pullRefresh : {
+            container:"#refreshContainer",//下拉刷新容器标识，querySelector能定位的css选择器均可，比如：id、.class等
+            down : {
+                height:50,//可选,默认50.触发下拉刷新拖动距离,
+                auto: true,//可选,默认false.自动下拉刷新一次
+                contentdown : "下拉可以刷新",//可选，在下拉可刷新状态时，下拉刷新控件上显示的标题内容
+                contentover : "释放立即刷新",//可选，在释放可刷新状态时，下拉刷新控件上显示的标题内容
+                contentrefresh : "正在刷新...",//可选，正在刷新状态时，下拉刷新控件上显示的标题内容
+                callback :getVideo //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+            },
+            up : {
+                height:50,//可选.默认50.触发上拉加载拖动距离
+                auto:false,//可选,默认false.自动上拉加载一次
+                contentrefresh : "正在加载...",//可选，正在加载状态时，上拉加载控件上显示的标题内容
+                contentnomore:'没有更多数据了',//可选，请求完毕若没有更多数据时显示的提醒内容；
+                callback :getMoreVideo //必选，刷新函数，根据具体业务来编写，比如通过ajax从服务器获取新数据；
+            }
+        }
+    });
+    function getVideo(){
+        pageNumber=1;
+        Zepto.ajax({
+            url:_url+'stream/popular?status=over&page='+pageNumber+'&length=20',
+            dataType:'json',//服务器返回json格式数据
+            type:'get',//HTTP请求类型
+            timeout:10000,//超时时间设置为10秒；
+            success:function(data){
+                pageNumber++;
+                var data=data.data;
+                mui('#refreshContainer ul')[0].innerHTML='';
+                for(var i=0;i<data.length;i++){
+                    if(data[i].status=='ready'){
+                        var label='<span style="background-color: #33BFD8" class="status">预告</span>';
+                    }else if(data[i].status=='live'){
+                        var label='<span style="background-color: #14C864" class="status">直播</span>';
+                    }else{
+                        var label='<span style="background-color: #4A4A4A" class="status">回放</span>';
+                    }
+                    mui('#refreshContainer ul')[0].innerHTML+='<li isSeries="'+data[i].isSeries+'" id="'+data[i].streamId+'" class="mui-table-view-cell mui-media"><div class="img">'+label+'<img class="mui-media-object mui-pull-left" src="'+data[i].thumbnailUrl+'"></div><div class="mui-media-body" ><h5 class="videoTitle">'+data[i].title+'</h5><div class="time">'+data[i].startTime+'</div><div class="watchCount"><span class="mui-icon mui-icon-eye"></span><span>'+data[i].watchedCount+'</span></div></div></li>'
+                }
+                mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                mui('#refreshContainer').pullRefresh().refresh(true);
+                el.loading("hide");
+            },
+            error:function(xhr,type,errorThrown){
+                //异常处理；
+                console.log(type);
+            }
+        });
+    }
+    function getMoreVideo(){
+        var keyword=mui('.search input')[0].value;
+        Zepto.ajax({
+            url:_url +'stream/popular?status=over&page='+pageNumber+'&length=20&keyword='+keyword,
+            dataType:'json',//服务器返回json格式数据
+            type:'get',//HTTP请求类型
+            timeout:10000,//超时时间设置为10秒；
+            success:function(data){
+                pageNumber++;
+                if(data.length==20){
+                    nextPageAvailable=false;
+                }else{
+                    nextPageAvailable=true;
+                }
+                mui('#refreshContainer').pullRefresh().endPullupToRefresh(nextPageAvailable);
+                var data=data.data;
+                for(var i=0;i<data.length;i++){
+                    mui('#refreshContainer ul')[0].innerHTML+='<li isSeries="'+data[i].isSeries+'" id="'+data[i].streamId+'" class="mui-table-view-cell mui-media"><div class="img"><img class="mui-media-object mui-pull-left" src="'+data[i].thumbnailUrl+'"></div><div class="mui-media-body" ><h5 class="videoTitle">'+data[i].title+'</h5><div class="time">'+data[i].startTime+'</div><div class="watchCount"><span class="mui-icon mui-icon-eye"></span><span>'+data[i].watchedCount+'</span></div></div></li>'
+                }
+            },
+            error:function(xhr,type,errorThrown){
+                //异常处理；
+                console.log(type);
+            }
+        });
+    }
+
+    function load(){//加载动画
+        el=Zepto.loading({
+            content:'正在加载中...'
+        })
+        el.on("loading:hide",function(){
+            mui('#block')[0].style.display='block';
+        });
+    }
+
+    mui("#refreshContainer").on('tap','li',function(){
+        //获取id
+        var id = this.getAttribute("id");
+        var isSeries= this.getAttribute("isSeries");
+        if(isSeries=='true'){
+            location.href='http://shouboke.tv/seriesClass/html/seriesTransfer.html?state='+id;
+        }else{
+            location.href='http://shouboke.tv/shareModel/transfer.html?streamId='+id;
+        }
+    })
+    bindSearch();
+    function bindSearch(){
+        document.onkeydown=function(event){
+            var e = event || window.event || arguments.callee.caller.arguments[0];
+            if(e && e.keyCode==13){
+                search();
+            }
+        };
+        mui("#block").on('tap','#search',function(){
+            search();
+        })
+    }
+    function search(){
+        var keyword=mui('.search input')[0].value;
+        var pageNumber=1
+        if(!keyword){
+            keyword='';
+        }
+        mui('.search input')[0].blur();
+        Zepto.ajax({
+            url:_url+'stream/popular?status=over&page='+pageNumber+'&length=20&keyword='+keyword,
+            dataType:'json',//服务器返回json格式数据
+            type:'get',//HTTP请求类型
+            timeout:10000,//超时时间设置为10秒；
+            success:function(data){
+                pageNumber++;
+                var data=data.data;
+                mui('#refreshContainer ul')[0].innerHTML='';
+                for(var i=0;i<data.length;i++){
+                    mui('#refreshContainer ul')[0].innerHTML+='<li isSeries="'+data[i].isSeries+'" id="'+data[i].streamId+'" class="mui-table-view-cell mui-media"><div class="img"><img class="mui-media-object mui-pull-left" src="'+data[i].thumbnailUrl+'"></div><div class="mui-media-body" ><h5 class="videoTitle">'+data[i].title+'</h5><div class="time">'+data[i].startTime+'</div><div class="watchCount"><span class="mui-icon mui-icon-eye"></span><span>'+data[i].watchedCount+'</span></div></div></li>'
+                }
+                if(data.length==0){
+                    mui('#refreshContainer ul')[0].innerHTML='<img style="width: 60%;margin-top: 15px;margin-left: 20%" src="./dist/img/img_wuya.png" alt=""/><p style="text-align: center;height: 100px;line-height: 100px">未查询到相关数据！</p>';
+                }
+                if(data.length==20){
+                    nextPageAvailable=false;
+                }else{
+                    nextPageAvailable=true;
+                }
+                mui('#refreshContainer').pullRefresh().endPullupToRefresh(nextPageAvailable);
+            },
+            error:function(xhr,type,errorThrown){
+                //异常处理；
+                console.log(type);
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+.stream{
+    background:#f8f8f8 ;
+}
+.stream li{
+    background: #fff;
+}
+.stream.ui-list>li.streamBg{
+     margin:0.1rem 0.08rem 0 0.08rem;
+    border-left:1px solid #dfdfdf;
+    border-right:1px solid #dfdfdf;
+ }
+.stream.ui-list>li.streamInfo{
+    padding-left: 0.08rem;
+    border-left:1px solid #dfdfdf;
+    border-right:1px solid #dfdfdf;
+    border-bottom: 2px solid #dfdfdf;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    margin:0 0.08rem 0.18rem 0.08rem;
+}
+.streamBg{
+    position: relative;
+    height:2.3rem;
+    overflow: hidden;
+}
+.streamBg a{
+    width:100% ;
+    height:100%;
+    display:block;
+}
+.streamBg span{
+    display: inline-block;
+    width: 40px;
+    height:25px;
+    text-align: center;
+    line-height: 25px;
+    background: #000;
+    color: #ffffff;
+    position: absolute;
+    left: 10px;
+}
+.streamBg img{
+    width: 100%;
+    height:100%;
+
+}
+.streamInfo small.date{
+    float: right;
+}
+
+#nothing{
+    display: none;
+    height:100%;
+    text-align: center;
+}
+#nothing img{
+    width: 60%;
+    margin-bottom: 5%;
+    margin-top: 35%;
+}
